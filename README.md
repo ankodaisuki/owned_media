@@ -22,8 +22,8 @@ Node.js と Python は Docker の中で動くので、Mac に直接インスト�
 ### 1. リポジトリをクローン
 
 ```bash
-git clone <GitHubリポジトリのURL>
-cd <クローンしたフォルダ名>
+git clone https://github.com/ankodaisuki/owned_media.git
+cd owned_media
 ```
 
 ### 2. Docker Compose で起動
