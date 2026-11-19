@@ -1,0 +1,45 @@
+# docker compose up --build で 3つのコンテナをまとめて起動します。
+#   web   : 読者向けサイト（Next.js）  http://localhost:3000
+#   admin : 管理画面（Next.js）        http://localhost:3001
+#   api   : バックエンド（FastAPI）    http://localhost:8000
+services:
+  api:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      # ブラウザから API を呼ぶことを許可するオリジン（カンマ区切り）
+      FRONTEND_ORIGINS: http://localhost:3000,http://localhost:3001
+    volumes:
+      - ./backend:/app # コードを保存すると --reload で自動反映
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # サーバー側（コンテナ内）から呼ぶので、サービス名 api を使います
+      API_BASE_URL: http://api:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # コンテナ内の node_modules を Mac 側で上書きしない
+      - /app/.next
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: ./admin
+    ports:
+      - "3001:3000" # コンテナ内は 3000、Mac からは 3001 で見る
+    environment:
+      API_BASE_URL: http://api:8000
+    volumes:
+      - ./admin:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
